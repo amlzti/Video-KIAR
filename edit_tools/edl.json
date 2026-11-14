@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "footage_dir": "footage/KIAR PSA",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "ranges": [
+    {"id": "cold",      "source": "Scene 7 Part 7",            "start": 3.22, "end": 5.00,  "beat": "HOOK",  "note": "flash-forward: 'How could this happen to my daughter?'"},
+    {"id": "lab_wide",  "source": "Scene 1 Intro",             "start": 0.00, "end": 3.00,  "mute": true, "beat": "HOOK", "note": "empty lab, Alice VO starts"},
+    {"id": "lab_walk",  "source": "IMG_9967",                  "start": 6.20, "end": 10.45, "mute": true, "beat": "HOOK", "note": "push in to laptop AIR QUALITY: HAZARDOUS"},
+    {"id": "title",     "source": "Extra Factory Scene 3",     "start": 2.40, "end": 6.40,  "mute": true, "crop_y": 0.55, "beat": "TITLE"},
+
+    {"id": "s2_car",    "source": "Scene 2 Part 1",            "start": 0.40, "end": 4.40,  "mute": true, "beat": "S2"},
+    {"id": "s2_cough",  "source": "Scene 2 Part 2",            "start": 0.30, "end": 5.52,  "beat": "S2"},
+    {"id": "s2_promise","source": "IMG_9979",                  "start": 0.98, "end": 7.80,  "beat": "S2", "note": "cleaner take than Scene 2 Part 3"},
+
+    {"id": "s3_fact",   "source": "Extra Factory Scene 1",     "start": 0.00, "end": 2.30,  "mute": true, "crop_y": 0.6, "beat": "S3"},
+    {"id": "s3_report", "source": "Scene 1 Part 1",            "start": 0.24, "end": 4.58,  "beat": "S3"},
+    {"id": "s3_argue",  "source": "Scene 3 Part 2",            "start": 0.62, "end": 12.98, "beat": "S3"},
+    {"id": "s3_profit", "source": "Scene 3 Part 2",            "start": 14.52, "end": 16.48, "beat": "S3", "note": "dropped repeated 'Just relax'"},
+
+    {"id": "s4_lab",    "source": "Scene 4 Extra",             "start": 0.20, "end": 3.00,  "mute": true, "beat": "S4"},
+    {"id": "s4_bribe",  "source": "Scene 4 Part 1",            "start": 0.80, "end": 9.20,  "beat": "S4"},
+    {"id": "s4_type",   "source": "Scene 4 Part 2",            "start": 0.30, "end": 3.20,  "mute": true, "beat": "S4"},
+    {"id": "s4_safe",   "source": "Scene 4 Part 2",            "start": 5.20, "end": 8.90,  "mute": true, "beat": "S4"},
+    {"id": "s4_usb",    "source": "Scene 4 Part 3",            "start": 3.60, "end": 10.40, "mute": true, "beat": "S4"},
+
+    {"id": "s5_greet",  "source": "Scene 5 Part 1",            "start": 0.85, "end": 5.42,  "beat": "S5"},
+    {"id": "s5_heres",  "source": "Scene 5 Part 1",            "start": 8.24, "end": 8.62,  "beat": "S5"},
+    {"id": "s5_gift",   "source": "Scene 5 Part 1",            "start": 9.06, "end": 11.56, "beat": "S5"},
+    {"id": "s5_thanks", "source": "Scene 5 Part 1",            "start": 12.38, "end": 13.20, "beat": "S5"},
+    {"id": "s5_envel",  "source": "Scene 5 Part 2",            "start": 3.40, "end": 9.92,  "beat": "S5"},
+    {"id": "s5_reportx","source": "Scene 5 Part 3",            "start": 0.60, "end": 4.24,  "beat": "S5"},
+    {"id": "s5_within", "source": "Scene 5 Part 3",            "start": 4.84, "end": 6.36,  "beat": "S5"},
+    {"id": "s5_neat",   "source": "Scene 5 Part 4",            "start": 5.20, "end": 12.04, "beat": "S5"},
+    {"id": "s5_stamp",  "source": "Scene 5 Part 4 Cut Stamp",  "start": 0.00, "end": 2.70,  "mute": true, "beat": "S5"},
+    {"id": "s5_biz",    "source": "Scene 5 Part 4 Cut Stamp",  "start": 4.52, "end": 6.92,  "beat": "S5"},
+
+    {"id": "s6_news",   "source": "Extra Factory Scene 2",     "start": 0.40, "end": 7.20,  "mute": true, "crop_y": 0.55, "beat": "S6"},
+    {"id": "s6_ring",   "source": "Scene 6 Part 1",            "start": 2.20, "end": 7.16,  "beat": "S6"},
+    {"id": "s6_call",   "source": "Scene 6 Voice over Teacher","start": 0.00, "end": 5.90,  "mute": true, "beat": "S6"},
+    {"id": "s6_drop",   "source": "Scene 6 Part 3",            "start": 0.00, "end": 2.00,  "beat": "S6"},
+
+    {"id": "s7_door",   "source": "Scene 7 Part 1",            "start": 0.00, "end": 2.20,  "mute": true, "beat": "S7"},
+    {"id": "s7_enter",  "source": "Scene 7 Part 2",            "start": 0.00, "end": 3.90,  "mute": true, "beat": "S7"},
+    {"id": "s7_doctor", "source": "Scene 7 Part 3",            "start": 0.40, "end": 8.72,  "beat": "S7"},
+    {"id": "s7_dial",   "source": "Scene 7 Part 4",            "start": 3.20, "end": 5.40,  "mute": true, "beat": "S7"},
+    {"id": "s7_macc",   "source": "Scene 7 Part 4",            "start": 8.50, "end": 13.90, "beat": "S7"},
+    {"id": "s7_raid",   "source": "Scene 7 Part 5",            "start": 0.00, "end": 4.60,  "mute": true, "beat": "S7"},
+    {"id": "s7_arrest1","source": "Scene 7 Part 6",            "start": 0.45, "end": 4.60,  "beat": "S7"},
+    {"id": "s7_wrong",  "source": "Scene 7 Part 7",            "start": 0.76, "end": 2.24,  "beat": "S7"},
+    {"id": "s7_tan_a",  "source": "Scene 7 Part 8",            "start": 0.00, "end": 2.10,  "beat": "S7"},
+    {"id": "s7_tan_b",  "source": "Scene 7 Part 8",            "start": 3.62, "end": 5.40,  "beat": "S7"},
+
+    {"id": "s8_notice", "source": "Scene 8",                   "start": 0.00, "end": 6.40,  "mute": true, "beat": "S8"},
+    {"id": "s8_close",  "source": "@black",                    "start": 0.00, "end": 17.0,  "mute": true, "beat": "S8", "note": "closing cards drawn by HyperFrames"}
+  ],
+  "caption_fixes": {
+    "census": "sensor",
+    "And Chad,": "Encik,",
+    "then": "",
+    "our filter.": "the filters.",
+    "admission": "emission",
+    "ready, malignant": "within the limit.",
+    "MNCC.": "MACC?",
+    "Captain,": "Encik Tan,",
+    "Che": "Cik",
+    "feel": "feels"
+  }
+}
