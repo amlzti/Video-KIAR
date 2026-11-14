@@ -114,7 +114,7 @@ events = [
     ("glitch", T("lab_walk", 2.83), -10, True),          # HAZARDOUS -> SAFE flip
     ("title_boom", T("title", 0.35), -6, True),          # title words land
     ("envelope", T("s4_bribe", 1.2), -8, False),         # 'a small bonus' - envelope slides
-    ("keyboard", T("s4_type", 0.2), -16, False),
+    ("keyboard", T("s4_type", 0.2), -23, False),
     ("glitch", T("s4_safe", 1.6), -12, True),
     ("usb", T("s4_usb", 0.6), -10, True),
     ("stamp", T("s5_stamp", 0.51), -5, True),             # COMPLIANT slam
@@ -143,10 +143,10 @@ for name, t, gdb, align in events:
 # ---------------------------------------------------------------- music beds
 MUS = EDIT / "music"
 beds = [  # file, out start, out end, src offset, fade in, fade out, level dB
-    ("Suspense_and_Tension-stem-7-1min.mp3", T("lab_wide"), T("s4_lab", 1.0), 0.0, 1.5, 2.0, -17),
-    ("Suspense_and_Tension-stem-3-1min.mp3", T("s4_lab", -0.5), T("s6_news", 0.1), 0.0, 1.5, 0.6, -18),
-    ("The_darkest_hour.mp3", T("s6_news", 1.2), T("s8_notice", 0.6), 0.0, 0.8, 1.2, -16),
-    ("Emotional_-_Piano_Instrumental.mp3", T("s8_notice", 0.2), TOTAL, 0.0, 1.2, 3.0, -15),
+    ("Suspense_and_Tension-stem-7-1min.mp3", T("lab_wide"), T("s4_lab", 1.0), 0.0, 1.5, 2.0, -21),
+    ("Suspense_and_Tension-stem-3-1min.mp3", T("s4_lab", -0.5), T("s6_news", 0.1), 0.0, 1.5, 0.6, -25),
+    ("The_darkest_hour.mp3", T("s6_news", 1.2), T("s8_notice", 0.6), 0.0, 0.8, 1.2, -20),
+    ("Emotional_-_Piano_Instrumental.mp3", T("s8_notice", 0.2), TOTAL, 0.0, 1.2, 3.0, -18),
 ]
 mus = np.zeros((N, 2), np.float32)
 for f, s, e, off, fi, fo, ldb in beds:
@@ -174,11 +174,11 @@ subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-
 
 # two-pass loudnorm
 m = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(raw), "-af",
-                    "loudnorm=I=-14:TP=-1:LRA=11:print_format=json", "-f", "null", "-"],
+                    "loudnorm=I=-14:TP=-2:LRA=11:print_format=json", "-f", "null", "-"],
                    capture_output=True, text=True).stderr
 j = json.loads(re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", m, re.S).group(0))
-af = (f"loudnorm=I=-14:TP=-1:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:"
+af = (f"loudnorm=I=-14:TP=-2:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:"
       f"measured_LRA={j['input_lra']}:measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true")
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", af, "-ar", "48000", "-c:a", "pcm_s24le",
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af", af + ",alimiter=limit=0.79:level=false:attack=2:release=60", "-ar", "48000", "-c:a", "pcm_s24le",
                 str(EDIT / "mix_master.wav")], check=True)
 print("mix:", EDIT / "mix_master.wav", f"{TOTAL:.2f}s;", len(events), "sfx;", len(speech_spans), "speech spans")

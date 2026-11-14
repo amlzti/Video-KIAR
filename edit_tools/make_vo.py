@@ -24,7 +24,7 @@ LINES = [
     {"id": "alice_whisper", "kokoro": "bf_emma", "speed": 0.9, "voice": "pFZP5JQG7iQjIQuC4Bku", "at": ("s4_usb", 3.7), "caption": True,
      "text": "That's not what the log says.", "gain_db": -4,
      "settings": {"stability": 0.3, "similarity_boost": 0.8, "style": 0.6}},
-    {"id": "news", "kokoro": "bm_george", "speed": 1.1, "voice": "onwK4e9ZLuTAKqWW03F9", "at": ("s6_news", 1.05), "caption": False,
+    {"id": "news", "kokoro": "bm_george", "speed": 1.1, "voice": "onwK4e9ZLuTAKqWW03F9", "at": ("s6_news", 1.05), "caption": False, "gain_db": -2,
      "text": "Dozens of students near the Taman Harapan industrial estate have been treated for breathing problems.",
      "settings": {"stability": 0.6, "similarity_boost": 0.8, "style": 0.1}, "fx": "broadcast"},
     {"id": "teacher", "kokoro": "af_nova", "speed": 1.1, "say": "Enchik Tan, it's Mei Ling. She can't breathe. We're sending her to the hospital.", "voice": "XrExE9yKIg1WjnnlVkGX", "at": ("s6_call", 0.35), "caption": True,
