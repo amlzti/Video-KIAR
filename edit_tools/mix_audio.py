@@ -86,6 +86,15 @@ for r in TLR:
     g = float(np.clip(TARGET / (rms + 1e-9), db(-6), db(9)))
     dlg[s:e] = seg * g
 
+# fade dialogue through dip-to-black transitions so sound follows picture
+for r in TLR:
+    tr = r.get("trans_out")
+    if tr and tr["type"] == "dip":
+        h = int(tr["dur"] / 2 * SR)
+        e = int(r["out_end"] * SR)
+        dlg[max(0, e - h):e] *= np.linspace(1, 0, min(h, e))[:, None]
+        dlg[e:min(N, e + h)] *= np.linspace(0, 1, min(h, N - e))[:, None]
+
 # ---------------------------------------------------------------- voice-over
 vo = np.zeros((N, 2), np.float32)
 speech_spans = []
@@ -118,8 +127,10 @@ events = [
     ("glitch", T("s4_safe", 1.6), -12, True),
     ("usb", T("s4_usb", 0.6), -10, True),
     ("stamp", T("s5_stamp", 0.51), -5, True),             # COMPLIANT slam
-    ("whoosh", T("s6_news", 0.0), -9, True),
-    ("news", T("s6_news", 1.2), -10, True),
+    ("whoosh", T("s6_smoke", 0.0), -9, True),
+    ("factory_night", T("s6_smoke", 0.0), -14, False),
+    ("siren", T("s6_amb1", -0.6), -15, False),
+    ("news", T("s6_amb1", 0.0), -10, True),
     ("drop", T("s6_drop", 0.5), -8, True),
     ("monitor", T("s7_enter", 0.6), -24, False),
     ("dial", T("s7_dial", 0.25), -14, False),
@@ -144,8 +155,8 @@ for name, t, gdb, align in events:
 MUS = EDIT / "music"
 beds = [  # file, out start, out end, src offset, fade in, fade out, level dB
     ("Suspense_and_Tension-stem-7-1min.mp3", T("lab_wide"), T("s4_lab", 1.0), 0.0, 1.5, 2.0, -21),
-    ("Suspense_and_Tension-stem-3-1min.mp3", T("s4_lab", -0.5), T("s6_news", 0.1), 0.0, 1.5, 0.6, -25),
-    ("The_darkest_hour.mp3", T("s6_news", 1.2), T("s8_notice", 0.6), 0.0, 0.8, 1.2, -20),
+    ("Suspense_and_Tension-stem-3-1min.mp3", T("s4_lab", -0.5), T("s6_smoke", 0.1), 0.0, 1.5, 0.6, -25),
+    ("The_darkest_hour.mp3", T("s6_amb1", 0.0), T("s8_notice", 0.6), 0.0, 0.8, 1.2, -20),
     ("Emotional_-_Piano_Instrumental.mp3", T("s8_notice", 0.2), TOTAL, 0.0, 1.2, 3.0, -18),
 ]
 mus = np.zeros((N, 2), np.float32)

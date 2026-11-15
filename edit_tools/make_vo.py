@@ -15,22 +15,22 @@ EDIT = REPO / "footage" / "KIAR PSA" / "edit"
 VO = EDIT / "vo"
 TL = {r["id"]: r for r in json.loads((EDIT / "timeline.json").read_text())}
 
-# premade voices: Lily (warm narrator), Daniel (news presenter), Matilda (warm adult female).
+# premade voices: Sarah (young, reassuring - Alice), Daniel (news presenter), Matilda (warm adult female).
 # "kokoro" is the on-device fallback voice used when the key lacks text_to_speech permission.
 LINES = [
-    {"id": "alice_open", "kokoro": "bf_emma", "voice": "pFZP5JQG7iQjIQuC4Bku", "at": ("lab_wide", 0.45), "caption": True,
+    {"id": "alice_open", "kokoro": "bf_emma", "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("lab_wide", 0.45), "caption": True,
      "text": "Numbers don't lie. But people do. And one changed number can cost a whole community.",
      "settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35}},
-    {"id": "alice_whisper", "kokoro": "bf_emma", "speed": 0.9, "voice": "pFZP5JQG7iQjIQuC4Bku", "at": ("s4_usb", 3.7), "caption": True,
+    {"id": "alice_whisper", "kokoro": "bf_emma", "speed": 0.9, "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("s4_usb", 3.7), "caption": True,
      "text": "That's not what the log says.", "gain_db": -4,
      "settings": {"stability": 0.3, "similarity_boost": 0.8, "style": 0.6}},
-    {"id": "news", "kokoro": "bm_george", "speed": 1.1, "voice": "onwK4e9ZLuTAKqWW03F9", "at": ("s6_news", 1.05), "caption": False, "gain_db": -2,
+    {"id": "news", "kokoro": "bm_george", "speed": 1.1, "voice": "onwK4e9ZLuTAKqWW03F9", "at": ("s6_amb1", 0.2), "caption": False, "gain_db": -2,
      "text": "Dozens of students near the Taman Harapan industrial estate have been treated for breathing problems.",
      "settings": {"stability": 0.6, "similarity_boost": 0.8, "style": 0.1}, "fx": "broadcast"},
     {"id": "teacher", "kokoro": "af_nova", "speed": 1.1, "say": "Enchik Tan, it's Mei Ling. She can't breathe. We're sending her to the hospital.", "voice": "XrExE9yKIg1WjnnlVkGX", "at": ("s6_call", 0.35), "caption": True,
      "text": "Encik Tan, it's Mei Ling. She can't breathe. We're sending her to the hospital.",
      "settings": {"stability": 0.3, "similarity_boost": 0.8, "style": 0.5}, "fx": "phone"},
-    {"id": "alice_close", "kokoro": "bf_emma", "speed": 0.92, "voice": "pFZP5JQG7iQjIQuC4Bku", "at": ("s8_close", 0.4), "caption": False,
+    {"id": "alice_close", "kokoro": "bf_emma", "speed": 0.92, "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("s8_close", 0.4), "caption": False,
      "text": "One honest report could have protected every child in that school.",
      "settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.3}},
 ]

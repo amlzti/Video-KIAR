@@ -101,7 +101,7 @@ def name_card(c, eid, start, dur, kicker, name, x, y, right=False):
     card_in(c, sel, start, dur, x_from=30 if right else -30)
 
 
-def aqi_meter(c, eid, start, dur, label, value, unit, status, frac, color, x=90, y=70):
+def aqi_meter(c, eid, start, dur, label, value, unit, status, frac, color, x=90, y=130):
     inner = (f'<div class="k">{esc(label)}</div>'
              f'<div style="display:flex;align-items:baseline;gap:14px">'
              f'<span class="disp aqi-v" style="font-size:84px;line-height:1;color:{color}">{esc(value)}</span>'
@@ -133,11 +133,72 @@ def glitch_burst(c, eid, t, dur=0.36):
 
 # ------------------------------------------------------------------ scenes
 
+LB = 104  # letterbox bar height (2.2:1 short-film frame)
+
+
+def cam_xform(s, fx, fy, k=0.35):
+    """Translate that zooms by s toward focus (fx, fy), clamped so frame edges never show."""
+    cx, cy = 960, 540
+    fxp, fyp = fx * 1920, fy * 1080
+    tx = (k - s) * (fxp - cx)
+    ty = (k - s) * (fyp - cy)
+    mx, my = (s - 1) * cx, (s - 1) * cy
+    return round(max(-mx, min(mx, tx)), 1), round(max(-my, min(my, ty)), 1)
+
+
+def camera():
+    c = Comp("camera", css="""
+      #camera-w, .tailw { position:absolute; inset:0; transform-origin:50% 50%; }
+      #camera-w video, .tailw video { position:absolute; left:0; top:0; width:1920px; height:1080px; object-fit:cover; }
+      .lb { position:absolute; left:0; width:1920px; background:#000; }
+    """)
+    vids = [f'<div id="camera-w"><video id="camera-base" class="clip" src="assets/base.mp4" data-start="0" '
+            f'data-duration="{TOTAL:.3f}" muted playsinline></video></div>']
+    rows = sorted(TL.values(), key=lambda r: r["out_start"])
+    last_state = {}
+    for r in rows:
+        t0, t1 = r["out_start"], r["out_end"]
+        kfs = r.get("cam") or [[0, 1.0, .5, .5, "cut"]]
+        prev_t = None
+        for (dt, sc, fx, fy, mode) in kfs:
+            x, y = cam_xform(sc, fx, fy)
+            at = round(min(t0 + dt, t1 - 0.034), 3)  # land before the next shot's cut
+            if mode == "cut" or prev_t is None:
+                c.tw(f'tl.set("#camera-w", {{scale:{sc}, x:{x}, y:{y}}}, {at});')
+            else:
+                c.tw(f'tl.to("#camera-w", {{scale:{sc}, x:{x}, y:{y}, duration:{at - prev_t:.3f}, ease:"sine.inOut"}}, {prev_t:.3f});')
+            prev_t = at
+            last_state[r["id"]] = (sc, x, y)
+    # transitions into the next shot
+    for r in rows:
+        tr = r.get("trans_out")
+        if not tr:
+            continue
+        d, t1 = tr["dur"], r["out_end"]
+        if tr["type"] == "dissolve" and r.get("tail"):
+            sc, x, y = last_state[r["id"]]
+            shutil.copy(EDIT / r["tail"], HF / "assets" / f"tail_{r['id']}.mp4")
+            vids.append(f'<div class="tailw" id="camera-tw-{r["id"]}" style="opacity:0">'
+                        f'<video id="camera-tail-{r["id"]}" class="clip" src="assets/tail_{r["id"]}.mp4" '
+                        f'data-start="{t1:.3f}" data-duration="{d:.3f}" muted playsinline></video></div>')
+            c.tw(f'tl.set("#camera-tw-{r["id"]}", {{scale:{sc}, x:{x}, y:{y}}}, 0);')
+            c.tw(f'tl.fromTo("#camera-tw-{r["id"]}", {{opacity:1}}, {{opacity:0, duration:{d:.3f}, ease:"sine.inOut"}}, {t1:.3f});')
+            c.tw(f'tl.set("#camera-tw-{r["id"]}", {{opacity:0}}, {t1 + d:.3f});')
+        elif tr["type"] == "dip":
+            sel = c.el(f"dip-{r['id']}", t1 - d / 2, d, "", style="position:absolute;inset:0;background:#000;opacity:0;")
+            c.tw(f'tl.fromTo("{sel}", {{opacity:0}}, {{opacity:1, duration:{d / 2:.3f}, ease:"power1.in"}}, {t1 - d / 2:.3f});')
+            c.tw(f'tl.to("{sel}", {{opacity:0, duration:{d / 2:.3f}, ease:"power1.out"}}, {t1:.3f});')
+    c.items = vids + c.items
+    c.items.append(f'<div class="lb" style="top:0;height:{LB}px"></div><div class="lb" style="bottom:0;height:{LB}px"></div>')
+    c.write()
+    return c
+
+
 def hook():
     c = Comp("hook")
     # flash-forward tag on the cold open (right side is empty glass wall)
     sel = c.el("ff", T("cold", 0.1), 1.6, '<span class="mono" style="font-size:28px;color:var(--amber)">'
-               '● REC &nbsp; TAMAN HARAPAN · 21 DAYS LATER</span>', style="position:absolute;right:80px;top:70px;")
+               '● 21 DAYS LATER</span>', style="position:absolute;right:80px;top:130px;")
     c.tw(f'tl.fromTo("{sel}", {{opacity:0}}, {{opacity:1, duration:0.2}}, {T("cold", 0.1)});')
     glitch_burst(c, "g1", END("cold", -0.22), 0.34)
 
@@ -204,7 +265,7 @@ def tags():
     # scene 5: inspection day
     sel = c.el("loc5", T("s5_greet", 0.2), 2.6,
                '<div class="k">Harapan Plastics · 10:00 AM</div><div class="n">Inspection Day</div>',
-               style="left:50%;top:60px;transform:translateX(-50%);border-left:none;border-top:6px solid var(--amber);"
+               style="left:50%;top:124px;transform:translateX(-50%);border-left:none;border-top:6px solid var(--amber);"
                      "text-align:center;", cls="card")
     c.tw(f'tl.fromTo("{sel}", {{opacity:0, y:-20}}, {{opacity:1, y:0, duration:0.45, ease:"expo.out"}}, '
          f'{T("s5_greet", 0.2):.3f});')
@@ -218,16 +279,17 @@ def tags():
 def evidence():
     c = Comp("evidence", css="""
       .alert { position:absolute; background:rgba(255,59,48,.92); color:#fff; padding:10px 22px; }
-      .stamp { position:absolute; left:50%; top:50%; width:820px; margin-left:-410px; margin-top:-120px;
-               border:12px solid var(--red); color:var(--red); text-align:center; font-family:'Oswald',sans-serif;
-               font-weight:700; font-size:170px; line-height:200px; letter-spacing:.08em;
-               background:rgba(255,255,255,.06); }
+      .stampw { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+      .stamp { display:inline-block; white-space:nowrap; border:12px solid var(--red); border-radius:10px;
+               color:var(--red); font-family:'Oswald',sans-serif; font-weight:700; font-size:150px; line-height:1;
+               letter-spacing:.06em; padding:22px 44px 26px 54px; background:rgba(255,59,48,.06);
+               box-shadow:inset 0 0 0 5px rgba(255,59,48,.35); }
     """)
     # falsified reading on the laptop close-up
     t = T("s4_safe", 0.5)
     sel = c.el("edit", t, 3.1, '<div class="mono" style="font-size:30px;color:#fff">⚠ EDIT DETECTED · 23:14:07</div>'
                '<div class="mono" style="font-size:28px;color:#ffd9d6;margin-top:4px">'
-               'AIR QUALITY: HAZARDOUS → SAFETY</div>', style="left:80px;top:70px;", cls="alert")
+               'AIR QUALITY: HAZARDOUS → SAFETY</div>', style="left:80px;top:130px;", cls="alert")
     card_in(c, sel, t, 3.1)
     glitch_burst(c, "g4", T("s4_safe", 1.6), 0.28)
     # Alice copies the raw log
@@ -238,13 +300,13 @@ def evidence():
              '<div class="bar" style="height:10px;width:460px;transform-origin:left;background:var(--amber)"></div></div>'
              '<div class="mono done" style="font-size:28px;color:var(--green);margin-top:10px;opacity:0">'
              '✓ ORIGINAL DATA SECURED</div>')
-    sel = c.el("usb", t, 5.8, inner, style="right:90px;top:80px;", cls="card")
+    sel = c.el("usb", t, 5.8, inner, style="right:90px;top:130px;", cls="card")
     card_in(c, sel, t, 5.8, x_from=30)
     c.tw(f'tl.fromTo("{sel} .bar", {{scaleX:0}}, {{scaleX:1, duration:3.2, ease:"none"}}, {t + 0.4:.3f});')
     c.tw(f'tl.to("{sel} .done", {{opacity:1, duration:0.2}}, {t + 3.7:.3f});')
     # COMPLIANT stamp slam (no faces in this insert)
     t = T("s5_stamp", 0.35)
-    sel = c.el("stamp", t, END("s5_stamp") - t, '<div class="stamp">COMPLIANT</div>',
+    sel = c.el("stamp", t, END("s5_stamp") - t, '<div class="stampw"><div class="stamp">COMPLIANT</div></div>',
                style="position:absolute;inset:0;")
     c.tw(f'tl.fromTo("{sel} .stamp", {{scale:2.4, rotation:-14, opacity:0}}, {{scale:1, rotation:-8, opacity:.92, '
          f'duration:0.16, ease:"power4.in"}}, {t:.3f});')
@@ -253,9 +315,9 @@ def evidence():
     t = T("s7_doctor", 3.0)
     inner = ('<div class="disp cnt" style="font-size:150px;line-height:1;color:var(--amber);text-shadow:0 4px 24px rgba(0,0,0,.6)">20</div>'
              '<div class="mono" style="font-size:30px;color:var(--paper);text-shadow:0 2px 12px rgba(0,0,0,.85)">STUDENTS · SAME SYMPTOMS</div>')
-    sel = c.el("cnt", t, 4.3, inner, style="position:absolute;left:900px;top:70px;text-align:left;")
+    sel = c.el("cnt", t, 2.95, inner, style="position:absolute;left:900px;top:130px;text-align:left;")
     c.tw(f'tl.fromTo("{sel}", {{opacity:0, filter:"blur(8px)"}}, {{opacity:1, filter:"blur(0px)", duration:0.3}}, {t:.3f});')
-    c.tw(f'tl.to("{sel}", {{opacity:0, duration:0.25}}, {t + 4.0:.3f});')
+    c.tw(f'tl.to("{sel}", {{opacity:0, duration:0.25}}, {t + 2.65:.3f});')
     # 997 dial
     t = T("s7_dial", 0.2)
     inner = "".join(f'<span class="d disp" style="display:inline-block;font-size:220px;color:var(--paper)">{d}</span>'
@@ -270,7 +332,7 @@ def evidence():
         t = T(rid, off)
         d = min(2.6, END(rid) - t) if rid == "s7_arrest1" else END(rid) - t
         sel = c.el(eid, t, d, f'<div class="mono" style="font-size:30px;letter-spacing:.14em">{txt}</div>',
-                   style=f"{side};top:70px;", cls="alert")
+                   style=f"{side};top:130px;", cls="alert")
         card_in(c, sel, t, d)
     # closure notice translation
     t = T("s8_notice", 0.8)
@@ -286,21 +348,22 @@ def evidence():
 
 def news():
     c = Comp("news", css="""
-      .bug { position:absolute; left:80px; top:64px; display:flex; gap:12px; align-items:center; }
-      .lt { position:absolute; left:80px; right:80px; bottom:150px; }
-      .ticker { position:absolute; left:0; right:0; bottom:70px; height:56px; background:#111; overflow:hidden; }
+      .bug { position:absolute; left:80px; top:128px; display:flex; gap:12px; align-items:center; }
+      .lt { position:absolute; left:80px; right:80px; bottom:190px; }
+      .ticker { position:absolute; left:0; right:0; bottom:110px; height:56px; background:#111; overflow:hidden; }
     """)
-    t0 = T("s6_news")
-    d = END("s6_news") - t0
+    t0 = T("s6_smoke")
+    d = END("s6_fact") - t0
     # "3 weeks later" chapter
-    sel = c.el("later", t0, 1.3, '<div class="disp" style="font-size:120px;color:var(--paper)">3 WEEKS LATER</div>',
-               style="position:absolute;inset:0;background:rgba(8,10,9,.92);display:flex;align-items:center;"
+    sel = c.el("later", t0, 2.9, '<div class="disp" style="font-size:120px;color:var(--paper);'
+               'text-shadow:0 6px 40px rgba(0,0,0,.7)">3 WEEKS LATER</div>',
+               style="position:absolute;inset:0;background:rgba(8,10,9,.45);display:flex;align-items:center;"
                      "justify-content:center;")
     c.tw(f'tl.fromTo("{sel} .disp", {{opacity:0, scale:1.08, filter:"blur(10px)"}}, '
          f'{{opacity:1, scale:1, filter:"blur(0px)", duration:0.3, ease:"expo.out"}}, {t0:.3f});')
-    c.tw(f'tl.to("{sel}", {{opacity:0, duration:0.2}}, {t0 + 1.1:.3f});')
-    t1 = t0 + 1.2
-    dd = d - 1.2
+    c.tw(f'tl.to("{sel}", {{opacity:0, filter:"blur(8px)", duration:0.3}}, {t0 + 2.55:.3f});')
+    t1 = T("s6_amb1")
+    dd = END("s6_fact") - t1
     c.el("bug", t1, dd, '<span style="background:var(--red);color:#fff;padding:6px 14px;font-size:28px" class="mono">● LIVE</span>'
                         '<span class="disp" style="font-size:40px;color:#fff">HARAPAN 24</span>',
          cls="bug")
@@ -353,10 +416,13 @@ def closing():
     credits = ("Inspector Tan — Javier Lee · Mei Ling — Eavan Tan · Emily — Jessy Pang Xin Yuan · "
                "Alice — Chua Xin Ying · Doctor — Amalia Izzati · Encik Razak &amp; MACC officer — special appearances")
     music = ("Music: “Suspense and Tension” — 3minutetunes · “The darkest hour” — zero-project · "
-             "“Emotional – Piano Instrumental” — E. Erkut (CC BY 3.0, Jamendo) · Voices &amp; SFX: ElevenLabs")
+             "“Emotional – Piano Instrumental” — E. Erkut (CC BY 3.0, Jamendo) · Voices &amp; SFX: ElevenLabs<br>"
+             "B-roll via Wikimedia Commons: “Blue chimneys of the factory emit gases” — Fumikas Sagisavas (CC0) · "
+             "“Ambulance running on road” — Free Video Library (CC BY 3.0) · "
+             "“Department of Health Malaysia Ambulance” — BlueHelvetical (CC BY-SA 4.0)")
     inner = ('<div class="disp" style="font-size:96px;color:var(--paper);line-height:1">CLEAN NUMBERS, '
              '<span style="color:var(--amber)">DIRTY AIR.</span></div>'
-             f'<div class="mono" style="font-size:24px;color:var(--dim);margin-top:40px;max-width:1700px;'
+             f'<div class="mono" style="font-size:28px;color:var(--dim);margin-top:36px;max-width:1760px;'
              f'line-height:1.7;text-transform:none;letter-spacing:.04em">{credits}<br>{music}</div>')
     sel = c.el("end", t0 + 12.2, full - 12.2, inner, style="position:absolute;inset:0;display:flex;"
                "flex-direction:column;align-items:center;justify-content:center;text-align:center;")
@@ -367,7 +433,7 @@ def closing():
 
 def captions():
     c = Comp("captions", css="""
-      .cap { position:absolute; left:0; right:0; bottom:64px; text-align:center; }
+      .cap { position:absolute; left:0; right:0; bottom:24px; text-align:center; }
       .cap span { display:inline-block; font-family:'Inter',sans-serif; font-weight:600; font-size:42px; color:#F4F5EF;
                   background:rgba(8,10,9,.58); padding:6px 18px 8px; border-radius:6px; }
       .cap.vo span { font-style:italic; color:#FFE3A3; }
@@ -402,12 +468,14 @@ def main():
         dst.unlink()
     os.link(base, dst)
 
-    scenes = [hook(), title(), tags(), evidence(), news(), closing(), captions()]
+    for f in (HF / "assets").glob("tail_*.mp4"):
+        f.unlink()
+    scenes = [camera(), hook(), title(), tags(), evidence(), news(), closing(), captions()]
     hosts = "\n      ".join(
         f'<div id="{s.cid}" data-composition-id="{s.cid}" data-composition-src="compositions/{s.cid}.html" '
-        f'data-start="0" data-duration="{TOTAL:.3f}" data-track-index="{i + 2}" '
+        f'data-start="0" data-duration="{TOTAL:.3f}" data-track-index="{i + 1}" '
         f'data-track-kind="{"captions" if s.cid == "captions" else "graphics"}" data-width="1920" data-height="1080" '
-        f'style="z-index:{i + 2}"></div>' for i, s in enumerate(scenes))
+        f'style="z-index:{i + 1}"></div>' for i, s in enumerate(scenes))
     index = f"""<!doctype html>
 <html lang="en">
   <head>
@@ -423,7 +491,6 @@ def main():
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="{TOTAL:.3f}" data-width="1920" data-height="1080">
-      <video id="base" class="clip" src="assets/base.mp4" data-start="0" data-duration="{TOTAL:.3f}" data-track-index="1" muted playsinline></video>
       {hosts}
     </div>
     <script>

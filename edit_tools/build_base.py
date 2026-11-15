@@ -62,8 +62,11 @@ FIXES = {
 
 
 def src_path(name: str) -> Path:
-    for ext in (".MOV", ".mp4", ".mov", ".MP4"):
-        p = FOOT / f"{name}{ext}"
+    base = FOOT
+    if name.startswith("@stock/"):
+        base, name = FOOT / "stock", name[len("@stock/"):]
+    for ext in (".MOV", ".mp4", ".mov", ".MP4", ".webm"):
+        p = base / f"{name}{ext}"
         if p.exists():
             return p
     raise FileNotFoundError(name)
@@ -176,9 +179,20 @@ def main():
         real = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                                               "-of", "csv=p=0", str(out)]).decode().strip())
         dur = round(round((r["end"] - r["start"]) * FPS) / FPS, 6)
-        timeline.append({"id": r["id"], "source": r["source"], "beat": r["beat"], "mute": bool(r.get("mute")),
-                         "src_start": r["start"], "src_end": r["end"], "out_start": round(t, 3),
-                         "out_end": round(t + dur, 3)})
+        entry = {"id": r["id"], "source": r["source"], "beat": r["beat"], "mute": bool(r.get("mute")),
+                 "src_start": r["start"], "src_end": r["end"], "out_start": round(t, 3),
+                 "out_end": round(t + dur, 3), "cam": r.get("cam"), "trans_out": r.get("trans_out")}
+        tr = r.get("trans_out")
+        if tr and tr["type"] == "dissolve":  # graded source frames just past the cut, for a real cross-dissolve
+            taildir = EDIT / ("tails_720" if a.preview else "tails")
+            taildir.mkdir(exist_ok=True)
+            tail = taildir / f"{r['id']}.mkv"
+            if not a.only or r["id"] in a.only.split(",") or not tail.exists():
+                extract({**r, "start": r["end"], "end": r["end"] + tr["dur"], "mute": True}, tail, w, h)
+            tmp4 = taildir / f"{r['id']}.mp4"
+            run(["ffmpeg", "-v", "error", "-y", "-i", str(tail), "-an", "-c:v", "copy", str(tmp4)])
+            entry["tail"] = f"{taildir.name}/{r['id']}.mp4"
+        timeline.append(entry)
         if not r.get("mute") and r["source"] != "@black":
             for g in chunk(apply_fixes(r["id"], words_for(r))):
                 s = max(t, g[0]["start"] - r["start"] + t - 0.05)
