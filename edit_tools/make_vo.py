@@ -21,7 +21,7 @@ LINES = [
     {"id": "alice_open", "kokoro": "bf_emma", "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("lab_wide", 0.45), "caption": True,
      "text": "Numbers don't lie. But people do. And one changed number can cost a whole community.",
      "settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35}},
-    {"id": "alice_whisper", "kokoro": "bf_emma", "speed": 0.9, "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("s4_usb", 3.7), "caption": True,
+    {"id": "alice_whisper", "user_file": "vo/alice_whisper_user.wav", "kokoro": "bf_emma", "speed": 0.9, "voice": "EXAVITQu4vr4xnSDxMaL", "at": ("s4_usb", 3.7), "caption": True,
      "text": "That's not what the log says.", "gain_db": -4,
      "settings": {"stability": 0.3, "similarity_boost": 0.8, "style": 0.6}},
     {"id": "news", "kokoro": "bm_george", "speed": 1.1, "voice": "onwK4e9ZLuTAKqWW03F9", "at": ("s6_amb1", 0.2), "caption": False, "gain_db": -2,
@@ -101,6 +101,9 @@ def main():
     VO.mkdir(parents=True, exist_ok=True)
     plan = []
     for line in LINES:
+        if line.get("user_file"):  # the actor's own recording replaces the generated voice
+            plan.append(json.loads((VO / "vo_plan.json").read_text())[[l["id"] for l in LINES].index(line["id"])])
+            continue
         al = tts(line)
         if al is not None:
             f, words, engine = VO / f"{line['id']}.mp3", words_from_alignment(al), "elevenlabs"
