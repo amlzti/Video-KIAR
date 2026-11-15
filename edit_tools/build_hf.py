@@ -200,7 +200,6 @@ def hook():
     sel = c.el("ff", T("cold", 0.1), 1.6, '<span class="mono" style="font-size:28px;color:var(--amber)">'
                '● 21 DAYS LATER</span>', style="position:absolute;right:80px;top:130px;")
     c.tw(f'tl.fromTo("{sel}", {{opacity:0}}, {{opacity:1, duration:0.2}}, {T("cold", 0.1)});')
-    glitch_burst(c, "g1", END("cold", -0.22), 0.34)
 
     # sensor HUD over the empty lab + laptop push-in (no faces in these shots)
     t0, t1 = T("lab_wide", 0.35), END("lab_walk", -0.05)
@@ -209,19 +208,26 @@ def hook():
     inner = "".join(f'<div class="row mono" style="font-size:30px;color:{col};margin:6px 0">{esc(t)}</div>'
                     for t, col in rows)
     inner += ('<div class="mono" style="font-size:30px;margin-top:18px;color:var(--paper)">STATUS&nbsp;&nbsp;'
-              '<span style="display:inline-grid"><span class="st-bad" style="grid-area:1/1;color:var(--red)">HAZARDOUS</span>'
-              '<span class="st-ok" style="grid-area:1/1;color:var(--green);opacity:0">SAFE</span></span></div>')
+              '<span style="display:inline-grid;position:relative">'
+              '<span class="sel" style="grid-area:1/1;background:rgba(255,176,0,.38);transform-origin:left;"></span>'
+              '<span class="st-bad" style="grid-area:1/1;color:var(--red);position:relative">HAZARDOUS</span>'
+              '<span class="st-ok" style="grid-area:1/1;color:var(--green);position:relative">'
+              + "".join(f'<span class="ch" style="opacity:0">{ch}</span>' for ch in "SAFE") +
+              '<span class="caret" style="opacity:0">▌</span></span></span></div>')
     sel = c.el("hud", t0, t1 - t0, inner, style="left:110px;top:300px;", cls="card")
     c.tw(f'tl.fromTo("{sel}", {{opacity:0}}, {{opacity:1, duration:0.3}}, {t0:.3f});')
     for i in range(len(rows)):
         c.tw(f'tl.fromTo("{sel} .row:nth-child({i + 1})", {{opacity:0, x:-12}}, {{opacity:1, x:0, duration:0.25, '
              f'ease:"power3.out"}}, {t0 + 0.25 + i * 0.32:.3f});')
     flip = T("lab_walk", 2.95)  # laptop fills frame: the number gets changed
-    c.tw(f'tl.to("{sel} .st-bad", {{opacity:0, duration:0.05, ease:"steps(1)"}}, {flip:.3f});')
-    c.tw(f'tl.to("{sel} .st-ok", {{opacity:1, duration:0.05, ease:"steps(1)"}}, {flip + 0.05:.3f});')
-    c.tw(f'tl.to("{sel}", {{borderLeftColor:"#3DFF8E", duration:0.05}}, {flip:.3f});')
-    glitch_burst(c, "g2", flip - 0.12, 0.3)
-    glitch_burst(c, "g3", END("lab_walk", -0.18), 0.3)
+    # like the script: the word is selected, then "SAFE" is typed over it
+    c.tw(f'tl.fromTo("{sel} .sel", {{scaleX:0}}, {{scaleX:1, duration:0.35, ease:"power2.out"}}, {flip - 0.45:.3f});')
+    c.tw(f'tl.set("{sel} .st-bad", {{opacity:0}}, {flip:.3f});')
+    c.tw(f'tl.set("{sel} .sel", {{opacity:0}}, {flip:.3f});')
+    c.tw(f'tl.fromTo("{sel} .ch", {{opacity:0}}, {{opacity:1, duration:0.01, stagger:0.11, ease:"none"}}, {flip + 0.06:.3f});')
+    c.tw(f'tl.fromTo("{sel} .caret", {{opacity:0}}, {{opacity:1, duration:0.01}}, {flip:.3f});')
+    c.tw(f'tl.to("{sel} .caret", {{opacity:0, duration:0.01}}, {flip + 0.7:.3f});')
+    c.tw(f'tl.to("{sel}", {{borderLeftColor:"#3DFF8E", duration:0.4, ease:"sine.inOut"}}, {flip + 0.1:.3f});')
     c.write()
     return c
 
@@ -291,7 +297,6 @@ def evidence():
                '<div class="mono" style="font-size:28px;color:#ffd9d6;margin-top:4px">'
                'AIR QUALITY: HAZARDOUS → SAFETY</div>', style="left:80px;top:130px;", cls="alert")
     card_in(c, sel, t, 3.1)
-    glitch_burst(c, "g4", T("s4_safe", 1.6), 0.28)
     # Alice copies the raw log
     t = T("s4_usb", 0.6)
     inner = ('<div class="k">USB · KINGSTON 32GB</div>'

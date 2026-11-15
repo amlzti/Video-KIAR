@@ -118,13 +118,11 @@ for c in json.loads((EDIT / "captions.json").read_text()):
 SFX = EDIT / "sfx"
 # (file, time of the visible hit, gain dB, align transient?)
 events = [
-    ("riser", END("cold", -0.05), -12, "end"),          # swells into the glitch cut
-    ("glitch", END("cold", -0.22), -9, True),
-    ("glitch", T("lab_walk", 2.83), -10, True),          # HAZARDOUS -> SAFE flip
+    ("riser", END("cold", -0.3), -14, "end"),           # swells into the fade to black
+    ("keyboard", T("lab_walk", 3.0), -24, False),         # "SAFE" typed over HAZARDOUS
     ("title_boom", T("title", 0.35), -6, True),          # title words land
     ("envelope", T("s4_bribe", 1.2), -8, False),         # 'a small bonus' - envelope slides
     ("keyboard", T("s4_type", 0.2), -23, False),
-    ("glitch", T("s4_safe", 1.6), -12, True),
     ("usb", T("s4_usb", 0.6), -10, True),
     ("stamp", T("s5_stamp", 0.51), -5, True),             # COMPLIANT slam
     ("whoosh", T("s6_smoke", 0.0), -9, True),
