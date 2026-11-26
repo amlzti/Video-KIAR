@@ -279,7 +279,7 @@ def tags():
     # scene 7: hospital
     name_card(c, "loc7", T("s7_door", 0.1), 2.0, "Same day · 4:12 PM", "Harapan District Hospital", 90, 820)
     # doctor: empty wall above the cabinet, right of her head
-    name_card(c, "doc", T("s7_enter", 0.3), 3.0, "Attending Doctor", "Dr. Amalia", 150, 160, right=True)
+    name_card(c, "doc", T("s7_enter", 0.3), 3.0, "Attending Doctor", "Dr. Aliza", 150, 160, right=True)
     c.write()
     return c
 
