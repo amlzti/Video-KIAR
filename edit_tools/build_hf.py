@@ -265,9 +265,9 @@ def tags():
     aqi_meter(c, "aqi3", T("s3_report", 2.4), 3.6, "STACK EMISSION", "3.4×", "OF LEGAL LIMIT", "OVER LIMIT", 0.92,
               "var(--red)")
     name_card(c, "raz", T("s3_report", 0.3), 2.2, "Factory Manager", "Encik Razak", 90, 640, right=True)
-    name_card(c, "emi", T("s3_argue", 0.4), 3.2, "Environmental Officer", "Emily", 90, 760, right=True)
+    name_card(c, "emi", T("s3_argue", 0.4), 3.2, "Lab Technician", "Emily", 90, 760, right=True)
     # scene 4: lab
-    name_card(c, "ali", T("s4_lab", 0.3), 2.4, "Lab Analyst", "Alice", 120, 330)
+    name_card(c, "ali", T("s4_lab", 0.3), 2.4, "Intern", "Alice", 120, 330)
     # scene 5: inspection day
     sel = c.el("loc5", T("s5_greet", 0.2), 2.6,
                '<div class="k">Harapan Plastics · 10:00 AM</div><div class="n">Inspection Day</div>',
@@ -278,6 +278,8 @@ def tags():
     c.tw(f'tl.to("{sel}", {{opacity:0, duration:0.25}}, {T("s5_greet", 2.55):.3f});')
     # scene 7: hospital
     name_card(c, "loc7", T("s7_door", 0.1), 2.0, "Same day · 4:12 PM", "Harapan District Hospital", 90, 820)
+    # doctor: empty wall above the cabinet, right of her head
+    name_card(c, "doc", T("s7_enter", 0.3), 3.0, "Attending Doctor", "Dr. Amalia", 150, 160, right=True)
     c.write()
     return c
 
@@ -316,13 +318,6 @@ def evidence():
     c.tw(f'tl.fromTo("{sel} .stamp", {{scale:2.4, rotation:-14, opacity:0}}, {{scale:1, rotation:-8, opacity:.92, '
          f'duration:0.16, ease:"power4.in"}}, {t:.3f});')
     c.tw(f'tl.fromTo("{sel} .stamp", {{x:0}}, {{x:6, duration:0.04, yoyo:true, repeat:5, ease:"none"}}, {t + 0.16:.3f});')
-    # 20 students counter (window area, above the faces)
-    t = T("s7_doctor", 3.0)
-    inner = ('<div class="disp cnt" style="font-size:150px;line-height:1;color:var(--amber);text-shadow:0 4px 24px rgba(0,0,0,.6)">20</div>'
-             '<div class="mono" style="font-size:30px;color:var(--paper);text-shadow:0 2px 12px rgba(0,0,0,.85)">STUDENTS · SAME SYMPTOMS</div>')
-    sel = c.el("cnt", t, 2.95, inner, style="position:absolute;left:900px;top:130px;text-align:left;")
-    c.tw(f'tl.fromTo("{sel}", {{opacity:0, filter:"blur(8px)"}}, {{opacity:1, filter:"blur(0px)", duration:0.3}}, {t:.3f});')
-    c.tw(f'tl.to("{sel}", {{opacity:0, duration:0.25}}, {t + 2.65:.3f});')
     # 997 dial
     t = T("s7_dial", 0.2)
     inner = "".join(f'<span class="d disp" style="display:inline-block;font-size:220px;color:var(--paper)">{d}</span>'
